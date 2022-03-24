@@ -19,7 +19,7 @@ local render = function (entities)
 
     end
 
-    for key, entity in pairs(entities) do
+    for key, entity in ipairs(entities) do
         local curComponents = entity.getComponents()
         if curComponents.appearance and curComponents.position and curComponents.shape then
             draw(curComponents.appearance, curComponents.position, curComponents.shape)
@@ -33,14 +33,33 @@ local movement = function (entities)
 
 end
 
-local controller = function (entities)
+local controller = function (entities, dir)
+
+    local move = function(pos, cmo)
+        local isAbove = function (pos)
+            x, y = unpack(pos)
+            return x < 0 or x >= game.map.size or y < 0 or y >= game.map.size
+        end
+
+        dx, dy = unpack(dir)
+
+        if cmo and cmo.isEnable then
+            pos.x = pos.x + dx
+            pos.y = pos.y + dy
+            if isAbove({pos.x, pos.y}) then 
+                pos.x = pos.x % game.map.size
+            end
+        elseif isAbove({pos.x + dx, pos.y + dy}) then
+            pos.x = pos.x + dx
+            pos.y = pos.y + dy
+        end
+    end
+
     for key, entity in ipairs(entities) do
         local curComponents = entity.getComponents()
         
         if curComponents.appearance and curComponents.position then
-            if curComponents.playerControlled then
-            elseif curComponents.enemyControlled then
-            end
+            move(curComponents.position, curComponents.isCanMoveOtherSide)
         end
     end
 end

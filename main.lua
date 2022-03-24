@@ -7,6 +7,7 @@
 local components = require("components")
 local systems = require("systems")
 local getEntity = require("entity")
+local swipe, setFunc = unpack(require("swipe"))
 
 local function printTable( t )
  
@@ -47,22 +48,21 @@ end
 
 game = {
     map = {
-        size = 4,
+        size = 2,
         width = display.contentWidth,
         height = display.contentHeight
     },
     turn = "player",
 }
 
-grid = (game.map.width - 150) / game.map.size
-start = -grid * game.map.size / 2
-
 function setMapSize(size)
     game.map.size = size
     grid = (game.map.width - 150) / size
     start = -grid * size / 2
 end
--- display.newCircle(100, 100, 30)
+
+setMapSize(4)
+
 
 local objects = {}
 
@@ -111,16 +111,22 @@ local rect = display.newImageRect(
 rect.x = display.contentCenterX
 rect.y = display.contentCenterY
 
+rect:addEventListener("touch", swipe)
 
 local player = getEntity()
 
 player.addComponent(components.appearance())
 player.addComponent(components.position(1, 1))
 player.addComponent(components.shape(display.newCircle(0, 0, grid * 0.35)))
+player.addComponent(components.isCanMoveOtherSide())
 
-objects["player"] = player
+table.insert(objects, player)
 
+local function move(pos)
+    systems.controller(objects, pos)
+end
 
+setFunc(move)
 
 local function frame(evt)
     systems.render(objects)

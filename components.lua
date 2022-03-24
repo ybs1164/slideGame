@@ -21,6 +21,13 @@ local position = function (x, y)
     end
 end
 
+local isCanMoveOtherSide = function ()
+    return {
+        name = "isCanMoveOtherSide",
+        isEnable = true,
+    }
+end
+
 local shape = function (display, color)
     if color == nil then
         color = {0, 0, 0}
@@ -33,17 +40,16 @@ local shape = function (display, color)
     }
 end
 
-local playerControlled = function ()
+local controlled = function ()
     return {
-        name = "playerControlled",
+        name = "controlled",
         isEnable = true,
     }
 end
 
-local enemyControlled = function ()
+local enemy = function ()
     return {
-        name = "enemyControlled",
-        isEnable = true,
+        name = "enemy",
     }
 end
 
@@ -51,6 +57,7 @@ return {
     appearance = appearance,
     position = position,
     shape = shape,
-    playerControlled = playerControlled,
-    enemyControlled = enemyControlled,
+    controlled = controlled,
+    enemy = enemy,
+    isCanMoveOtherSide = isCanMoveOtherSide,
 }
