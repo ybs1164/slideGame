@@ -47,21 +47,30 @@ local controller = function (entities, dir)
             pos.x = pos.x + dx
             pos.y = pos.y + dy
             if isAbove({pos.x, pos.y}) then 
-                pos.x = pos.x % game.map.size
+                pos.x = (pos.x + game.map.size)%game.map.size
+                pos.y = (pos.y + game.map.size)%game.map.size
             end
-        elseif isAbove({pos.x + dx, pos.y + dy}) then
+            return true
+        elseif not isAbove({pos.x + dx, pos.y + dy}) then
             pos.x = pos.x + dx
             pos.y = pos.y + dy
+            return true
         end
+
+        return false
     end
+
+    local any = false
 
     for key, entity in ipairs(entities) do
         local curComponents = entity.getComponents()
         
         if curComponents.appearance and curComponents.position then
-            move(curComponents.position, curComponents.isCanMoveOtherSide)
+            any = any or move(curComponents.position, curComponents.isCanMoveOtherSide)
         end
     end
+
+    return any
 end
 
 return {

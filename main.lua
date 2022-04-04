@@ -7,7 +7,7 @@
 local components = require("components")
 local systems = require("systems")
 local getEntity = require("entity")
-local swipe, setFunc = unpack(require("swipe"))
+local swipe, setSwipeFunc = unpack(require("swipe"))
 
 local function printTable( t )
  
@@ -122,11 +122,16 @@ player.addComponent(components.isCanMoveOtherSide())
 
 table.insert(objects, player)
 
-local function move(pos)
-    systems.controller(objects, pos)
+local function controlPlayer(pos)
+    if game.turn == "enemy" then
+        return
+    end
+    if systems.controller(objects, pos) then
+        game.turn = "enemy"
+    end
 end
 
-setFunc(move)
+setSwipeFunc(controlPlayer)
 
 local function frame(evt)
     systems.render(objects)
