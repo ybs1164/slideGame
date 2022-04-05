@@ -3,7 +3,10 @@ solar 2d
 
 using ECS (Entity Component System)
 
+## todoist
 
-# reference
+> enemy's AI
+
+## reference
 
 https://docs.coronalabs.com/api/index.html

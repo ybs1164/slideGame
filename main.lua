@@ -59,35 +59,7 @@ game = {
     }
 }
 
-function setMapSize(size)
-    game.map.size = size
-    game.map.grid = (game.map.width - 150) / size
-    game.map.start = -game.map.grid * size / 2
-end
-
-local objects = {}
-
-local function getGameStatus()
-    local list = {}
-    for _, object in pair(objects) do
-        list[#list+1] = {
-            x = object.x,
-            y = object.y,
-            id = object.name
-        }
-    end
-    list["turn"] = game.turn
-
-    return list
-end
-
-local function nextGameStatusGenerate(status)
-    -- todo
-end
-
-function generateAllGameStatus(startStatus)
-    -- todo 
-end
+local rect = nil
 
 local function drawMap(map)
     local tex = graphics.newTexture({
@@ -125,26 +97,61 @@ local function drawMap(map)
     return tex
 end
 
-local mapTex = drawMap(game.map)
+function setMap(size)
+    game.map.size = size
+    game.map.grid = (game.map.width - 150) / size
+    game.map.start = -game.map.grid * size / 2
 
-local rect = display.newImageRect(
-    mapTex.filename,
-    mapTex.baseDir,
-    game.map.width,
-    game.map.height
-)
-rect.x = display.contentCenterX
-rect.y = display.contentCenterY
+    local mapTex = drawMap(game.map)
 
-rect:addEventListener("touch", swipe)
+    if rect ~= nil then
+        rect:removeSelf()
+    end
 
-setMapSize(4)
+    rect = display.newImageRect(
+        mapTex.filename,
+        mapTex.baseDir,
+        game.map.width,
+        game.map.height
+    )
+    rect.x = display.contentCenterX
+    rect.y = display.contentCenterY
+
+    rect:addEventListener("touch", swipe)
+end
+
+local objects = {}
+
+local function getGameStatus()
+    local list = {}
+    for _, object in ipairs(objects) do
+        list[#list+1] = {
+            x = object.x,
+            y = object.y,
+            id = object.name
+        }
+    end
+    list["turn"] = game.turn
+
+    return list
+end
+
+local function nextGameStatusGenerate(status)
+    -- todo
+end
+
+function generateAllGameStatus(startStatus)
+    -- todo 
+end
+
+
+setMap(4)
 
 local player = getEntity()
 
 player.addComponent(components.appearance())
 player.addComponent(components.position(1, 1))
-player.addComponent(components.shape(display.newCircle(0, 0, grid * 0.35)))
+player.addComponent(components.shape("circle", 0.7))
 player.addComponent(components.isCanMoveOtherSide())
 player.addComponent(components.controlled())
 

@@ -36,14 +36,21 @@ local isCanMoveOtherSide = function ()
     }
 end
 
-local shape = function (display, color)
+local shape = function (type, radius, color)
+    local displayObject = nil
+    if type == "circle" then
+        displayObject = display.newCircle(0, 0, radius * game.map.grid * 0.5)
+    elseif type == "path" then
+        -- todo
+    end
+
     if color == nil then
         color = {0, 0, 0}
     end
-    display:setFillColor(unpack(color));
+    displayObject:setFillColor(unpack(color));
     return {
         name = "shape",
-        display = display,
+        display = displayObject,
         color = color,
     }
 end

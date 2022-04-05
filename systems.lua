@@ -16,7 +16,7 @@ local render = function (entities)
             return
         end
 
-        x, y = getRealPosition(pos)
+        local x, y = getRealPosition(pos)
 
         sha.display.x = x
         sha.display.y = y
@@ -41,11 +41,11 @@ local controller = function (entities, dir)
 
     local move = function(pos, cmo)
         local isAbove = function (pos)
-            x, y = unpack(pos)
+            local x, y = unpack(pos)
             return x < 0 or x >= game.map.size or y < 0 or y >= game.map.size
         end
 
-        dx, dy = unpack(dir)
+        local dx, dy = unpack(dir)
 
         if cmo and cmo.isEnable then
             pos.x = pos.x + dx
