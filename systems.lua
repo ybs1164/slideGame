@@ -1,8 +1,12 @@
 local render = function (entities)
 
     local function getRealPosition(pos)
-        local x = pos.x * grid + start + grid/2 + game.map.width/2
-        local y = pos.y * grid + start + grid/2 + game.map.height/2
+        local w, h = game.map.width, game.map.height
+        local grid, start = game.map.grid, game.map.start
+
+        local x = pos.x * grid + start + grid/2 + w/2
+        local y = pos.y * grid + start + grid/2 + h/2
+
         return x, y 
     end
 
@@ -66,7 +70,9 @@ local controller = function (entities, dir)
         local curComponents = entity.getComponents()
         
         if curComponents.appearance and curComponents.position then
-            any = any or move(curComponents.position, curComponents.isCanMoveOtherSide)
+            if curComponents.controlled and curComponents.controlled.isEnable then
+                any = any or move(curComponents.position, curComponents.isCanMoveOtherSide)
+            end
         end
     end
 

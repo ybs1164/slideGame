@@ -21,6 +21,14 @@ local position = function (x, y)
     end
 end
 
+local nextMove = function (list)
+    return {
+        name = "nextMove",
+        nextMoving = list,
+    }
+end
+
+-- player only
 local isCanMoveOtherSide = function ()
     return {
         name = "isCanMoveOtherSide",
