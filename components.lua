@@ -41,7 +41,21 @@ local shape = function (type, radius, color)
     if type == "circle" then
         displayObject = display.newCircle(0, 0, radius * game.map.grid * 0.5)
     elseif type == "path" then
-        -- todo
+        local function drawPath(path)
+            local tex = graphics.newTexture({
+                type = "canvas",
+                width = 512,
+                height = 512,
+            })
+
+            -- todo 
+
+            return tex
+        end
+
+        -- todo 
+
+        return drawPath()
     end
 
     if color == nil then

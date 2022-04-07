@@ -123,24 +123,47 @@ end
 local objects = {}
 
 local function getGameStatus()
-    local list = {}
+    local status = {}
     for _, object in ipairs(objects) do
-        list[#list+1] = {
+        status[#status+1] = {
             x = object.x,
             y = object.y,
             id = object.name
         }
     end
-    list["turn"] = game.turn
+    status.turn = game.turn
 
-    return list
+    return status
 end
 
-local function nextGameStatusGenerate(status)
-    -- todo
+local function generateNextGameStatus(status)
+    local function copy(value)
+        if type(value) ~= 'table' then return value end
+        local res = {}
+        for k, v in pairs(value) do res[copy(k)] = copy(v) end
+        return res
+    end
+
+    local nextGameList = {}
+    if status.turn == "player" then
+
+        nextGameList[#nextGameList+1] = copy(status)
+        for _, object in ipairs(status) do
+            local components = object.getComponents()
+            if components.controlled and components.controlled.isEnable then
+                if components.position and components.nextMove then
+                    for i, v in components.nextMove.list do
+                        
+                    end
+                end
+            end
+        end
+    elseif status.turn == "enemy" then
+
+    end
 end
 
-function generateAllGameStatus(startStatus)
+function generateAllGameStatus(status)
     -- todo 
 end
 
@@ -151,6 +174,16 @@ local player = getEntity()
 
 player.addComponent(components.appearance())
 player.addComponent(components.position(1, 1))
+player.addComponent(components.nextMove({
+    {1, 0},
+    {1, 1},
+    {0, 1},
+    {-1, 1},
+    {-1, 0},
+    {-1, -1},
+    {0, -1},
+    {1, -1}
+}))
 player.addComponent(components.shape("circle", 0.7))
 player.addComponent(components.isCanMoveOtherSide())
 player.addComponent(components.controlled())
