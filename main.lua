@@ -125,11 +125,27 @@ local objects = {}
 local function getGameStatus()
     local status = {}
     for _, object in ipairs(objects) do
-        status[#status+1] = {
-            x = object.x,
-            y = object.y,
-            id = object.name
-        }
+        printTable(object)
+        local components = object.getComponents()
+
+        if components.position then
+            local x, y = components.position.x, components.position.y
+            local v = {}
+            local team = "enemy"
+            if components.nextMove then
+                v = components.nextMove.nextMoving
+            end
+            if components.controlled and components.controlled.isEnable then
+                team = "player"
+            end
+            status[#status+1] = {
+                x = x,
+                y = y,
+                v = v,
+                id = object.getID(),
+                team = team
+            }
+        end
     end
     status.turn = game.turn
 
@@ -144,23 +160,36 @@ local function generateNextGameStatus(status)
         return res
     end
 
-    local nextGameList = {}
-    if status.turn == "player" then
+    local function pushNewContent(list, obj)
+        list[#list+1] = copy(obj)
+    end
 
-        nextGameList[#nextGameList+1] = copy(status)
+    local nextGameList = {}
+
+    if status.turn == "player" then -- status -> player turn
+
+        local player = {}
+
         for _, object in ipairs(status) do
-            local components = object.getComponents()
-            if components.controlled and components.controlled.isEnable then
-                if components.position and components.nextMove then
-                    for i, v in components.nextMove.list do
-                        
-                    end
-                end
+            if object.team == "player" then
+                player = object
             end
         end
-    elseif status.turn == "enemy" then
+
+        for _, v in pairs(player.v) do
+            local copyObject = copy(player)
+
+            local dx, dy = unpack(v)
+            copyObject.x = copyObject.x + dx
+            copyObject.y = copyObject.y + dy
+
+            pushNewContent(nextGameList, copyObject)
+        end
+    elseif status.turn == "enemy" then -- status -> enemy turn
 
     end
+
+    return nextGameList
 end
 
 function generateAllGameStatus(status)
@@ -189,6 +218,8 @@ player.addComponent(components.isCanMoveOtherSide())
 player.addComponent(components.controlled())
 
 table.insert(objects, player)
+
+generateNextGameStatus(getGameStatus())
 
 local function controlPlayer(pos)
     if game.turn == "enemy" then

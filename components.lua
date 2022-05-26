@@ -21,6 +21,7 @@ local position = function (x, y)
     end
 end
 
+-- {{0, 0}}
 local nextMove = function (list)
     return {
         name = "nextMove",
@@ -85,6 +86,7 @@ end
 return {
     appearance = appearance,
     position = position,
+    nextMove = nextMove,
     shape = shape,
     controlled = controlled,
     enemy = enemy,
