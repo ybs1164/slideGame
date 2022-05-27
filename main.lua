@@ -6,7 +6,8 @@
 
 local components = require("components")
 local systems = require("systems")
-local getEntity = require("entity")
+local getEntity = require("lib.entity")
+local method = require("lib.method")
 local swipe, setSwipeFunc = unpack(require("swipe"))
 
 local function printTable( t )
@@ -59,6 +60,7 @@ game = {
     }
 }
 
+-- map outline
 local rect = nil
 
 local function drawMap(map)
@@ -97,6 +99,7 @@ local function drawMap(map)
     return tex
 end
 
+-- set map drawing
 function setMap(size)
     game.map.size = size
     game.map.grid = (game.map.width - 150) / size
@@ -122,78 +125,103 @@ end
 
 local objects = {}
 
-local function getGameStatus()
+-- add for need to search better choice for enemies
+function getGameStatus()
     local status = {}
     for _, object in ipairs(objects) do
-        printTable(object)
         local components = object.getComponents()
 
         if components.position then
-            local x, y = components.position.x, components.position.y
-            local v = {}
-            local team = "enemy"
+            local obj = {
+                x = components.position.x,
+                y = components.position.y,
+                team = "enemy",
+            }
             if components.nextMove then
-                v = components.nextMove.nextMoving
+                obj.v = components.nextMove.nextMoving
             end
             if components.controlled and components.controlled.isEnable then
-                team = "player"
+                obj.team = "player"
             end
-            status[#status+1] = {
-                x = x,
-                y = y,
-                v = v,
-                id = object.getID(),
-                team = team
-            }
+            if components.isCanMoveOtherSide then
+                obj.moveoutside = components.isCanMoveOtherSide.isEnable
+            end
+            status[object.getID()] = obj
         end
     end
     status.turn = game.turn
+    status.previousStatus = nil
+    status.nextStatusList = {}
 
     return status
 end
 
+local function copy(value)
+    if type(value) ~= 'table' then return value end
+    local res = {}
+    for k, v in pairs(value) do res[copy(k)] = copy(v) end
+    return res
+end
+
+local function push(list, obj)
+    list[#list+1] = obj
+end
+
+
 local function generateNextGameStatus(status)
-    local function copy(value)
-        if type(value) ~= 'table' then return value end
-        local res = {}
-        for k, v in pairs(value) do res[copy(k)] = copy(v) end
-        return res
-    end
-
-    local function pushNewContent(list, obj)
-        list[#list+1] = copy(obj)
-    end
-
     local nextGameList = {}
+    status.previousStatus = status
 
     if status.turn == "player" then -- status -> player turn
+        local playerID = ""
 
-        local player = {}
-
-        for _, object in ipairs(status) do
+        for id, object in pairs(status) do
             if object.team == "player" then
-                player = object
+                playerID = id
             end
         end
 
-        for _, v in pairs(player.v) do
-            local copyObject = copy(player)
+        for _, v in pairs(status[playerID].v) do
+            local copyStatus = copy(status)
+            local copyPlayer = copyStatus[playerID]
 
-            local dx, dy = unpack(v)
-            copyObject.x = copyObject.x + dx
-            copyObject.y = copyObject.y + dy
+            method.move(copyPlayer, v, copyPlayer.moveoutside)
 
-            pushNewContent(nextGameList, copyObject)
+            push(nextGameList, copyStatus)
         end
     elseif status.turn == "enemy" then -- status -> enemy turn
+        local enemyIDList = {} -- {{}}
 
+        for id, object in pairs(status) do
+            if object.team == "enemy" then
+                push(enemyIDList, id)
+            end
+        end
+
+        for _, enemyID in ipairs(enemies) do
+            for _, v in pairs(enemy.v) do
+                local copyStatus = copy(status)
+                local copyObject = copyStatus[enemyID]
+
+                method.move(copyPlayer, v, copyPlayer.moveoutside)
+
+                push(nextGameList, copyStatus)
+            end
+        end
     end
 
     return nextGameList
 end
 
-function generateAllGameStatus(status)
-    -- todo 
+local function generateAllGameStatus(status)
+    -- todo : stop this generate
+    status.nextStatusList = generateNextGameStatus(status)
+
+    for i, nstat in ipairs(status.nextStatusList) do
+        generateAllGameStatus(nstat)
+    end
+
+    return status
 end
 
 
@@ -218,8 +246,6 @@ player.addComponent(components.isCanMoveOtherSide())
 player.addComponent(components.controlled())
 
 table.insert(objects, player)
-
-generateNextGameStatus(getGameStatus())
 
 local function controlPlayer(pos)
     if game.turn == "enemy" then

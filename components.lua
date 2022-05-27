@@ -21,6 +21,22 @@ local position = function (x, y)
     end
 end
 
+local smoothly = function (x, y)
+    if x == nil then
+        return {
+            name = "smoothly",
+            sx = 0,
+            sy = 0,
+        }
+    else
+        return {
+            name = "smoothly",
+            sx = x,
+            sy = y,
+        }
+    end
+end
+
 -- {{0, 0}}
 local nextMove = function (list)
     return {
@@ -29,7 +45,6 @@ local nextMove = function (list)
     }
 end
 
--- player only
 local isCanMoveOtherSide = function ()
     return {
         name = "isCanMoveOtherSide",
@@ -77,18 +92,11 @@ local controlled = function ()
     }
 end
 
-local enemy = function ()
-    return {
-        name = "enemy",
-    }
-end
-
 return {
     appearance = appearance,
     position = position,
     nextMove = nextMove,
     shape = shape,
     controlled = controlled,
-    enemy = enemy,
     isCanMoveOtherSide = isCanMoveOtherSide,
 }
